@@ -1,0 +1,3 @@
+2025-03-23 20:41:40,697	[INFO] - ioUsb488: Sun Mar 23 20:41:40 2025 : ERROR, IntfResource::initObject, OpenNamedPipeM(data) failed, is [iproc488] running?
+
+2025-03-23 20:41:40,701	[INFO] - delete resource in resource manager
