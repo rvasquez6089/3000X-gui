@@ -3,6 +3,7 @@ import sys
 import time
 import uuid
 from enum import Enum
+from typing import BinaryIO, cast
 
 import numpy as np
 import pyvisa
@@ -31,6 +32,9 @@ class PersistentGUISettings:
         self.save_path = None
         self.filename = 'Test'
         self.overwrite = False
+
+    def __repr__(self):
+        return f"acquisitions {self.acquisitions}\npoints {self.points}\nsave_path {self.save_path}\nfilename {self.filename}\n overwrite {self.overwrite}"
 
 
 
@@ -81,13 +85,52 @@ class CaptureGui(QMainWindow):
             settings_path = os.getenv('APPDATA')
         else:
             settings_path = os.getcwd()
-        filepath = settings_path+ '.3000xgui_settings.rtv3000'
-        if os.path.exists(filepath):
-            np.load(filepath)
-        else:
-            settings = PersistentGUISettings()
-            np.savez(filepath, settings)
+        filename = settings_path + '\\3000xgui_settings.rtv3000'
+        filepath = os.path.join(settings_path, filename)
+        print('Loading settings from', filepath)
+        print(f"bool {os.path.isfile(filepath)}")
+        if os.path.isfile(filepath):
+            print(f"File {filepath} exists, loading...")
+            settings = np.load(filepath, allow_pickle=True)
+            try:
+                gui_settings = settings['gui_settings'].item()
+            except KeyError as e:
+                print(f"\033[31mKey Error in Settings file: {e}")
+                print(f"Settings file incompatible\033[0m")
+                settings.close()
+                settings = self.createnewsettingsfile()
+                gui_settings = settings['gui_settings'].item()
+            print(f"Settings\n {gui_settings}")
 
+        else:
+            print(f"File {filepath} does not exist, creating...")
+            gui_settings = PersistentGUISettings()
+            file = open(filepath, 'wb')
+            file.write(b' ')
+            file = open(filepath, 'wb')
+            np.savez(file, gui_settings=gui_settings, allow_pickle=True)
+
+    def createnewsettingsfile(self):
+        """
+        Will create a new settings file and delete the existing one if possible.
+        Returns the opened newly created settings file.
+        """
+        if os.name == 'nt':
+            settings_path = os.getenv('APPDATA')
+        else:
+            settings_path = os.getcwd()
+        filename = settings_path + '\\3000xgui_settings.rtv3000'
+        filepath = os.path.join(settings_path, filename)
+        print('Creating new settings file', filepath)
+        print(f"bool {os.path.isfile(filepath)}")
+        if os.path.isfile(filepath):
+            os.remove(filepath)
+        gui_settings = PersistentGUISettings()
+        file = open(filepath, 'wb')
+        file.write(b' ')
+        file = open(filepath, 'wb')
+        np.savez(file, gui_settings=gui_settings, allow_pickle=True)
+        return np.load(filepath, allow_pickle=True)
 
 
 

@@ -12,6 +12,9 @@ pg.setConfigOptions(antialias=True)
 
 
 data = np.load('test_data.npz', allow_pickle=True)
+for items in data:
+    print(type(data[items]))
+
 metadata = data['metadata'].item()
 savedata = data['savedata']
 acqtimes = data['acqtimes']
@@ -128,10 +131,10 @@ legend.addItem(p4, 'scatter')
 
 p1plotcurve.setData(x=savedata[0, 0, :],      y=savedata[1, 0, :])
 p2plotcurve.setData(x=savedata[0, 0, :],    y=savedata[2, 0, :])
-p3plotcurve.setData(x=savedata[0, 0, :],    y=savedata[3, 0, :])
-p4plotcurve.setData(x=savedata[0, 0, :],    y=savedata[4, 0, :])
+# p3plotcurve.setData(x=savedata[0, 0, :],    y=savedata[3, 0, :])
+# p4plotcurve.setData(x=savedata[0, 0, :],    y=savedata[4, 0, :])
 
-for i, ps in enumerate((MainPW.getPlotItem(), p2, p3, p4)):
+for i, ps in enumerate((MainPW.getPlotItem(), p2)):
     meta = metadata.channels[i]
     print(f"channel: {meta.channel} Vrange : {meta.vrange} offset : {meta.offset} ")
     ps.setYRange((meta.vrange*-1) / 2 + meta.offset, meta.vrange / 2 + meta.offset)
